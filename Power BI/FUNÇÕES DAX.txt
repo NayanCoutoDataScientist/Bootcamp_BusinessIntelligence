@@ -1,0 +1,195 @@
+ESTUDAR:
+	LINGUAGEM M
+	POWER QUERY
+	FLUXO DE DADOS
+	DATA WAREHOUSE
+	API JSON
+
+NA TABELA:	= Csv.Document(File.Contents("G:\.shortcut-targets-by-id\1LGVHatPnen88oWwSJKTCUNf5eQFlKDKC\Nayan\Portifolio\Tabelas 			Faturamento\dSheestAjustesFaturamento.csv"),[Delimiter=";"]) - importa banco de dados csv
+
+
+13 - DAX COM INTELIGÊNCIA DE TEMPO
+
+	1 - Configurando o Calendário
+		Calendario = CALENDAR(MIN(DADOS[DATA DA ENTREGA]), MAX(DADOS[DATA DA ENTREGA]))
+		
+		Ano = YEAR(Calendario[Date])
+		
+		Mes = MONTH(Calendario[Date])
+		
+		Descricao do Mes = FORMAT(Calendario[Date],"MMM")
+		
+		Trimestre = FORMAT(Calendario[Date], "q") & "T" & "/" & YEAR(Calendario[Date])
+	
+
+	2 - DAXdatas = DISTINCT(DADOS[NOTAFISCAL])
+		
+		firstDate = FIRSTDATE(DADOS[DATA DO  PEDIDO])
+		
+		lastDate = LASTDATE(DADOS[DATA DO  PEDIDO])
+		
+		startOfMonth = STARTOFMONTH(DADOS[DATA DO  PEDIDO])
+		
+		endOfMonth = ENDOFMONTH(Calendario[Date])
+	
+
+	3 - DAXagregados = DISTINCT(Calendario[Ano])
+		
+		DateAddSum = CALCULATE(SUM(DADOS[VALOR VENDA]),DATEADD(Calendario[Date], 1, DAY)) » Valor do dia posterior do valor real.
+		
+		EntreDatas = CALCULATE(SUM(DADOS[VALOR VENDA]), DATESBETWEEN(Calendario[Date], DATE(2018, 03, 01), DATE(2018, 03, 15))) » Somatório dos valores entre datas.
+		
+		ProximoMes = CALCULATE(SUM(DADOS[VALOR VENDA]), PARALLELPERIOD(Calendario[Date], 1, MONTH)) » Retorna o valor do mês seguinte ao filtrado.
+		
+		VendasDoMes = TOTALMTD(SUM(DADOS[VALOR VENDA]), Calendario[Date]) » Filtra por mês.
+		
+		VendasTrimestre = TOTALQTD(SUM(DADOS[VALOR VENDA]), Calendario[Date]) » Filtra por trimestre.
+		
+		VendasdoAno = TOTALYTD(SUM(DADOS[VALOR VENDA]), Calendario[Date]) » Filtra por ano.
+		
+		DatesMtd = CALCULATE(SUM(DADOS[VALOR VENDA]),DATESMTD(Calendario[Date])) » Acumula valores por mês.
+		
+		DatesQtd = CALCULATE(SUM(DADOS[VALOR VENDA]), DATESQTD(Calendario[Date])) » Acumula valores por trimestre.
+		
+		DatesYtd = CALCULATE(SUM(DADOS[VALOR VENDA]), DATESYTD(Calendario[Date])) » Acumula valores por ano.
+		
+		NextQuarter = CALCULATE(SUM(DADOS[VALOR VENDA]), NEXTQUARTER(Calendario[Date])) » Retorna a somatória dos valores do próximo trimestre.
+		
+		NextYear = CALCULATE(SUM(DADOS[VALOR VENDA]), NEXTYEAR(Calendario[Date])) » Retorna a somatória dos valores do próximo ano.
+		
+		AcumuladoAno = SUMX(VALUES(Calendario[Date]), CALCULATE(SUM(DADOS[VALOR VENDA]), DATESYTD(Calendario[Date]))) » Total acumulado linha a linha dos valores acumulados
+		
+		NextDay = CALCULATE(SUM(DADOS[VALOR VENDA]), NEXTDAY(Calendario[Date])) » Retorna o valor do dia seguinte
+		
+		NextMonth = CALCULATE(SUM(DADOS[VALOR VENDA]), NEXTMONTH(Calendario[Date])) » Retorna o valor do mes seguinte
+		
+		PreviousDay = CALCULATE(SUM(DADOS[VALOR VENDA]), PREVIOUSDAY(Calendario[Date])) » Retorna o valor do dia anterior
+		
+		PreviousYear = CALCULATE(SUM(DADOS[VALOR VENDA]), PREVIOUSYEAR(Calendario[Date])) » Retorna o valor do ano anterior
+
+
+14 - DAX COM FUNÇÕES LÓGICAS
+
+	4 - DaxFuncoesLogicas
+		
+		Valor_Diarias = RELATED('2019_Viagem'[Valor diárias]) » Importar uma coluna de uma tabela para outra
+		
+		Escalao_Funcionario = IF('DaxFuncoesLogicas'[Valor_Diarias] > 70, "Alto Escalão", "Baixo Escalão") » função SE condicional
+		
+		Descricao_Mes = MID(DaxFuncoesLogicas[Data_Fim], 4, 2) » importa os dados apartir de uma posição posição e quantidade
+		
+		Descricao_do_Mes = SWITCH('DaxFuncoesLogicas'[Mes], "01", "Janeiro", "02", "Fevereiro", "03", "Março", "04", "Abril", "05", "Maio", "06",
+		 "Junho", "07", "Julho", "08", "Agosto", "09", "Setembro", "10", "Outubro", "11", "Novembro", "12", "Dezembro", "Sem Mês") » Formatação condicional de valores de células
+		
+		Pagamento = IF(AND('DaxFuncoesLogicas'[Escalao_Funcionario]=="Alto Escalão", 'DaxFuncoesLogicas'[Mes]=="01"), "Recebimento adiantado", "Recebimento não adiantado") » Função 'SE' condicional com boleano 'dupla condição'.
+		
+		Pagamento = IF(OR('DaxFuncoesLogicas'[Escalao_Funcionario]=="Alto Escalão", 'DaxFuncoesLogicas'[Mes]=="01"), "Recebimento adiantado", "Recebimento não adiantado") » Função 'SE' condicional com boleano 'uma condição'.
+		
+		Situacao_Funcionario_Ativo = IF(DaxFuncoesLogicas[Viagem_Situacao]=="Realizada" && 'DaxFuncoesLogicas'[Escalao_Funcionario]=="Alto Escalão" && DaxFuncoesLogicas[Mes]=="01",
+		 "Funcionário Ativo", "Funcionário Inativo") » Boleano 'SE' com múltipla condição
+
+		Situacao_Funcionario_Ativo = IF(DaxFuncoesLogicas[Viagem_Situacao]=="Realizada" || 'DaxFuncoesLogicas'[Escalao_Funcionario]=="Alto Escalão" || DaxFuncoesLogicas[Mes]=="01",
+		 "Funcionário Ativo", "Funcionário Inativo") » Boleano 'SE' com 'uma condição de múltiplos argumentos OU' 
+		
+		TotalGeralDiarias = SUM('2019_Viagem'[Valor diárias]) » Somatório de valores da coluna
+
+		TotalPorMinisterio = CALCULATE(SUM('2019_Viagem'[Valor diárias]), FILTER('2019_Viagem', '2019_Viagem'[Nome órgão solicitante]=="Agência Nacional de Águas")) » Isolamento por filtro
+		
+		Total_Geral_Ministerio = CALCULATE(SUM('2019_Viagem'[Valor diárias]), ALL('2019_Viagem'[Valor diárias])) » Ignora os Filtros
+
+		SomaSelecionada = CALCULATE(SUM(DaxFuncoesLogicas[Valor_Diarias]), DaxFuncoesLogicas[Mes] IN {"01", "02"}) » Opera em cima de filtros por comparação de conjuntos
+		
+
+15 - DAX COM FUNÇÕES INFORMACIONAIS
+		
+		AvaliacaoContains = IF (CONTAINS(PAGAMENTO, PAGAMENTO[CODIGO_DEPARTAMENTO], 10), "DEPARTAMENTO INVESTIGADO", "DEPARTAMENTO LIVRE") » Retorna um booleano para o elemento filtrado
+
+		AvaliacaoIsBlank = IF (ISBLANK(MIN(PAGAMENTO[SALARIO])), "NAO PAGO", "OK") » Verifica se possuí um valor nulo e retorna um valor ou variável com base em booleano.
+
+		AvaliacaoAumento = IF (IS ERROR(SUM(PAGAMENTO[SALARIO])/PAGAMENTO[AUMENTO%]), "NÃO HOUVE AUMENTO SALARIAL", "OK") - Verifica se existe um erro na operação e retorna um valor booleano ou variável para o erro.
+		
+		AvaliacaoProporcional = IF(ISEVEN(PAGAMENTO[AUMENTO%]),"PROPORCIONAL","OK")  » Verifica se o numero é par e retorna booleano
+		SomenteTrueFalse = ISEVEN(PAGAMENTO[AUMENTO%])
+
+		AvaliacaoIsLogical = ISLOGICAL(PAGAMENTO[SOMENTETRUEFALSE]) » Verifica se o conteúdo é booleano
+
+		AvaliacaoIsNonText = NOT ISERROR(ISNONTEXT(INT(LEFT(PAGAMENTO[CODIGO_FUNCAO],2))))	» ISNONTEXT, verifica se o valor não é texto
+
+		AvaliacaoIsNumber = NOT ISERROR(ISNUMBER(VALUE(LEFT(PAGAMENTO[CODIGO_FUNCAO],2))))	» ISNUMBER, verifica se o valor é numérico
+
+		AvaliacaoIsText = ISERROR(ISTEXT(VALUE(LEFT(PAGAMENTO[CODIGO_FUNCAO],2))))	» ISTEXT, verifica se o valor é texto
+
+		AvaliacaoLookUpValue = LOOKUPVALUE(DEPARTAMENTO[DEPARTAMENTO],DEPARTAMENTO[CODIGO],PAGAMENTO[CODIGO_DEPARTAMENTO],"INEXISTENTE"	» LOOKUPVALUE, retorna um valor de acordo com critérios
+
+		AvaliacaoContainsRow = CONTAINSROW({"RH","LOGISTICA"},PAGAMENTO[AvaliacaoLookupValue])	» CONTAINSROW, retorna se existem valores no registro pesquisado
+
+
+16 - DAX COM FUNÇÕES DE TEXTO
+
+		Juncao = CONCATENATE(datatram2019[municipio], datatran2019[uf])	» CONCATENATE, concatenação de textos em uma nova coluna
+
+		EspacoEmBranco = TRIM(CONCATENATE("     -----",datatran2019[municipio]))	» TRIM, retirar espaços em branco em uma coluna
+
+		TrocaInform = REPLACE(datatran2019[classificacao_acidente], 1, 3,"POSSUI VITIMAS FERIDAS")	» Replace, trocar caractere em uma coluna
+
+		Maiusculo = UPPER(datatran2019[municipio])	» UPPER, textos em maiúsculo em uma coluna
+
+		Minusculo = LOWER(datatran2019[municipio])	» LOWER, texto em minúsculo em uma coluna
+		
+		Encontrar = FIND("/", datatran2019[uop], 1, 0)	» FIND, pesquisa o texto e retorna posição em uma nova coluna
+
+		ParteTexto = MID(datatran2019[TROCAINFORM], 8, 7)	» MID, retira parte do texto
+
+		RepeteTexto = REPT("BRASIL ", 3)	» REPT, repete um texto n vezes en uma coluna
+
+		TextoEsquerda = LEFT(datatran2019[uop], ABS(FIND("/", datatran2019[uop], 1, 0) -1))	» LEFT, retira parte do texto à esquerda
+
+		TextoDireita = RIGHT(datatran2019[uop], 2)	» Right, retira parte do texto à direita
+
+
+17 - DAX COM FUNÇÕES DE MATEMÁTICAS
+		 
+		VABS = ABS(Treinamento[PRECO DE VENDA] - Treinamento[PRECO DE FABRICACAO]	» ABS, retorna um valor matemático absoluto
+
+		VCEILING = CEILING(Treinamento[DESCONTOS], 1)	» CEILING, arredonda o valor para cima, inteiro mais próximo com base em um múltiplo
+
+		VDIVIDE = DIVIDE(Treinamento[VABS], 12) 	» DIVIDE, realiza a operação de divisão ignorando o erro da divisão por 0
+
+		VFLOOR = FLOOR(Treinamento[VABS], 2)	» FLOOR, arredonda valores para baixo com base em múltiplos
+
+		VPRODUCT = PRODUCT(Treinamento[PRECO DE VENDA]) 	» PRODUCT, realiza a multiplicação entre numeros de uma coluna
+
+		VROUND = ROUND(Treinamento[VDIVIDE], 2) 	» ROUND, arredonda o número para o número especificado de dígitos em uma coluna
+
+		VROUNDDOWN = ROUNDDOWN(Treinamento[VDIVIDE], 2) 	» ROUNDDOWN, arrendoda um número para baixo
+
+		VROUNDUP = ROUNDUP(Treinamento[VDIVIDE], 2)	» ROUNDUP, arredonda para cima
+
+		VTRUNC = TRUNC(Treinamento[VDIVIDE], 2) 	» TRUNC, trunca um número inteiro, fixando os valores
+
+		VSUMX = SUMX(Treinamento, Treinamento[VENDAS])  	» SUMX, varre as células e retorna a somatória de uma expressão avaliada para cada linha da tabela
+		VSUMX = SUMX(Treinamento, Treinamento[UNIDADES VENDIDAS] * Treinamento[PRECO DE VENDA]) » Operação de somatória relacionando duas ou mais tabelas
+		VSUMXFILTER = SUMX(FILTER(Treinamento, Treinamento[PAIS], "Canada", Treinamento[VENDAS]) » Métrica condicional
+		VSUMXIF = SUMX(Treinamento, IF(Treinamento[UNIDADES VENDIDAS]>200, Treinamento[VENDAS], 0))
+
+		VRANKX = RANKX(ALL(Treinamento[PAIS]), CALCULATE(SUM(Treinamento[VENDAS])))	» RANKX, retorna a classificação dentre os registros de uma tabela
+
+		VAVERAGEX = AVERAGEX(Treinamento, Treinamento[VENDAS])  	» AVERAGEX, calcula a média dos dados
+		VAVERAGEXFILTER = AVERAGEX(FILTER(ALL(Treinamento), Treinamento[PAIS]="Mexico"), Treinamento[VENDAS])
+
+		VCOUNTX = COUNTX(FILTER(ALL(Treinamento), Treinamento[PAIS]="Mexico"), Treinamento[VENDAS]) 	» COUNTX, conta os resultados não vazios dentre os registros de uma tabela
+
+		VMAXX = MAXX(FILTER(ALL(Treinamento), Treinamento[PAIS]="Mexico"), Treinamento[VENDAS]) 	» MAXX, retorna o máximo dentre os registros de uma tabela
+
+		VMIN = MINX(FILTER(ALL(Treinamento), Treinamento[PAIS]="Mexico"), Treinamento[VENDAS]) 	» MINX, retorna o menor valor dentre os registros de uma tabela
+
+
+05 RegressaoLinear = 
+LINESTX(
+    FILTER(
+        D_Calendario,
+        D_Calendario[bolVendas] == TRUE()
+    ),
+    '00 MedidasTabularesEstoqueFull'[2.1 qtde_vendas],
+    'D_Calendario'[DATA])
+
