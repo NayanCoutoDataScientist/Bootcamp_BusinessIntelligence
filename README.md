@@ -1,4 +1,4 @@
-SUPER ACADEMIA BI - 18 cursos em 1 - tudo em um único lugar
+## **SUPER ACADEMIA BI - 18 cursos em 1 - tudo em um único lugar**
 
 
 PL / SQL : é super amplo, inclui: Instalação de ferramentas, diferenças entre os comandos DML, DDL e DCL, privilégios de DBA, comandos DCL e suas configurações, comandos DML e suas configurações, comandos de junção de tabelas, manipulação de strings, comandos de agregação (incluindo agrupamento de resultados), criação de subconsultas, consultas hierarquizadas, criação de visualizações, configuração de bloco anônimo, estrutura condicional, tipo de dados, saída de resultados, estrutura de repetição, uso de cursores implícitos, uso de cursores explícitos, tratamento de exceções, construção de subprogramas, uso de gatilhos e construção de embalagens.  (contém BATERIAS DE EXERCÍCIOS) (APOSTILA PRÓPRIA)
